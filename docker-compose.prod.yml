@@ -44,9 +44,11 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - FRONTEND_URL_CORS=${FRONTEND_URL_CORS}
       - NODE_ENV=${NODE_ENV}
-    ports:
-      # Publish backend port to host for direct access
-      - "3000:3000"
+    # ports:
+    #   # Publish backend port to host for direct access
+    #   - "3000:3000"
+    expose:
+      - "3000"
     healthcheck:
       # Check if backend API is responding
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
@@ -62,14 +64,17 @@ services:
       #   condition: service_healthy
 
   # Frontend service (React/Vite build)
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     # Publish frontend port to host for direct browser access
-  #     - "5173:80"
-
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    # coolify gere automatiquement le routage de port sur le vps
+    expose:
+      - "80"
+    # ports:
+    #   # Publish frontend port to host for direct browser access
+    #   - "5173:80"
+ 
   # Redis service
   # redis:
   #   image: redis:7-alpine
