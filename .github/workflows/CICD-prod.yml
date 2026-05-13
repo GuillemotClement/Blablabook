@@ -168,37 +168,37 @@ jobs:
 
 
 ### DEPLOY FRONTEND TO SURGE ###
-  deploy-frontend:
-    needs: ci-frontend
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # deploy-frontend:
+  #   needs: ci-frontend
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
       
-      - name: Download frontend build
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: frontend/dist
+  #     - name: Download frontend build
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: frontend-build
+  #         path: frontend/dist
       
-      - name: Create 200.html for SPA routing
-        run: cp frontend/dist/index.html frontend/dist/200.html
+  #     - name: Create 200.html for SPA routing
+  #       run: cp frontend/dist/index.html frontend/dist/200.html
       
-      - name: Deploy to Surge
-      # ne pas oublier de mettre SURGE_DOMAIN et SURGE_TOKEN dans le secret de GitHub
-        run: |
-          npm install -g surge
-          surge frontend/dist ${{ secrets.SURGE_DOMAIN }} \
-            --token ${{ secrets.SURGE_TOKEN }}
+  #     - name: Deploy to Surge
+  #     # ne pas oublier de mettre SURGE_DOMAIN et SURGE_TOKEN dans le secret de GitHub
+  #       run: |
+  #         npm install -g surge
+  #         surge frontend/dist ${{ secrets.SURGE_DOMAIN }} \
+  #           --token ${{ secrets.SURGE_TOKEN }}
 
 ### DEPLOY BACKEND TO RENDER ###
-  deploy-backend:
-    needs: ci-docker
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Render deploy via API
-        run: |
-          curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d '{"clearCache": true}' \
-            https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}
+  # deploy-backend:
+  #   needs: ci-docker
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Trigger Render deploy via API
+  #       run: |
+  #         curl -X POST \
+  #           -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+  #           -H "Content-Type: application/json" \
+  #           -d '{"clearCache": true}' \
+  #           https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}
