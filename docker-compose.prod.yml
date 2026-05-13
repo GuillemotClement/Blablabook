@@ -84,13 +84,13 @@ services:
   #     timeout: 3s
   #     retries: 5
 
-  adminer:
-    image: adminer
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
+  # adminer:
+  #   image: adminer
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - postgres
 
 volumes:
   # Persistent volume for PostgreSQL data
