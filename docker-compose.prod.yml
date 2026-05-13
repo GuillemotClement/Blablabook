@@ -12,12 +12,12 @@ services:
       - pgdata:/var/lib/postgresql/data
       # Initialize database with SQL script
       # - ../init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    ports:
-      # Map host port 5433 to container 5432 for external access
-      - "5433:5432"
+    # ports:
+    #   # Map host port 5433 to container 5432 for external access
+    #   - "5433:5432"
     healthcheck:
       # Check if PostgreSQL is ready to accept connections
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       start_period: 15s
       interval: 15s
       timeout: 5s
