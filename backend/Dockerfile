@@ -1,27 +1,55 @@
-# Dockerfile for the Node.js backend
+# # Dockerfile for the Node.js backend
 
-# Use Node.js 20 Alpine as a lightweight base image
-FROM node:20-alpine
+# # Use Node.js 20 Alpine as a lightweight base image
+# FROM node:20-alpine
 
-# Install curl for healthchecks or testing purposes, then clean cache
-RUN apk add --update \
-    curl \
-    && rm -rf /var/cache/apk/*
+# # Install curl for healthchecks or testing purposes, then clean cache
+# RUN apk add --update \
+#     curl \
+#     && rm -rf /var/cache/apk/*
 
-# Set working directory inside the container
+# # Set working directory inside the container
+# WORKDIR /app
+
+# # Copy package.json and package-lock.json (if exists) to install dependencies
+# COPY package.json package-lock.json* ./
+
+# # Install only production dependencies
+# RUN npm install --production
+
+# # Copy the rest of the backend source code into the container
+# COPY . .
+
+# # Expose backend API port
+# EXPOSE 3000
+
+# # Start the backend application
+# CMD ["node", "dist/main.js"]
+
+
+
+FROM node:20-alpine AS builder
+
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if exists) to install dependencies
-COPY package.json package-lock.json* ./
+COPY package*.json ./
+RUN npm ci
 
-# Install only production dependencies
-RUN npm install --production
-
-# Copy the rest of the backend source code into the container
 COPY . .
+RUN npm run build
 
-# Expose backend API port
+
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+RUN apk add --no-cache curl
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+COPY --from=builder /app/dist ./dist
+
 EXPOSE 3000
 
-# Start the backend application
 CMD ["node", "dist/main.js"]
