@@ -7,10 +7,13 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/authStore";
+import CguPage from "@/pages/Cgu/CguPage";
 
 // Lazy-loaded pages for code splitting - each route downloads only when visited
 const LoginPage = lazy(() => import("@/pages/Auth/LoginPage/LoginPage"));
-const RegisterPage = lazy(() => import("@/pages/Auth/RegisterPage/RegisterPage"));
+const RegisterPage = lazy(
+  () => import("@/pages/Auth/RegisterPage/RegisterPage"),
+);
 const HomePage = lazy(() => import("@/pages/HomePage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const LibraryPage = lazy(() => import("@/pages/LibraryPage"));
@@ -33,6 +36,12 @@ const protectedRoute = createRoute({
       throw redirect({ to: "/login" });
     }
   },
+});
+
+const cguPage = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/cgu",
+  component: () => <CguPage />,
 });
 
 const homeRoute = createRoute({
@@ -86,6 +95,7 @@ const routeTree = rootRoute.addChildren([
   loginPage,
   seeAllRoute,
   bookDetailsRoute,
+  cguPage,
   protectedRoute.addChildren([libraryRoute, profilePage]),
 ]);
 
