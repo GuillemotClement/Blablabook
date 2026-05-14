@@ -1,6 +1,6 @@
 # Documentation CI GitHub Actions
 
-La CI est decoupee en 4 workflows GitHub Actions, avec un fichier par responsabilite.
+La CI est decoupee en plusieurs workflows GitHub Actions, avec un fichier par responsabilite.
 
 Ces workflows se lancent automatiquement sur :
 
@@ -26,6 +26,19 @@ Elle publie aussi le dossier `frontend/dist` comme artifact GitHub, ce qui perme
 
 Si cette CI echoue, le probleme vient generalement du frontend : erreur TypeScript, build Vite casse, dependance manquante ou variable d'environnement necessaire au build.
 
+## Frontend Tests
+
+Fichier : `.github/workflows/frontend-tests.yml`
+
+Cette CI lance les tests unitaires du frontend sur chaque pull request vers `dev` ou `main`.
+
+Elle lance principalement :
+
+- `npm ci` dans le dossier `frontend`
+- `npm test -- --run` dans le dossier `frontend`
+
+Si cette CI echoue, cela signifie qu'au moins un test Vitest cote frontend ne passe pas.
+
 ## Backend CI
 
 Fichier : `.github/workflows/backend.yml`
@@ -38,6 +51,19 @@ Elle lance principalement :
 - `npm run build` dans le dossier `backend`
 
 Si cette CI echoue, le probleme vient generalement du backend : erreur TypeScript, build NestJS casse, import invalide ou dependance manquante.
+
+## Backend Tests
+
+Fichier : `.github/workflows/backend-tests.yml`
+
+Cette CI lance les tests unitaires du backend sur chaque pull request vers `dev` ou `main`.
+
+Elle lance principalement :
+
+- `npm ci` dans le dossier `backend`
+- `npm test` dans le dossier `backend`
+
+Si cette CI echoue, cela signifie qu'au moins un test Jest cote backend ne passe pas.
 
 ## Docker CI
 
