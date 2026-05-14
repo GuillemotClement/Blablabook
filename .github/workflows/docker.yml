@@ -1,0 +1,83 @@
+name: Docker CI
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+  pull_request:
+    branches:
+      - dev
+      - main
+
+jobs:
+  compose:
+    name: Docker Compose healthcheck
+    runs-on: ubuntu-latest
+    env:
+      DB_NAME: blablabook
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/blablabook
+      JWT_SECRET: ci-secret
+      FRONTEND_URL_CORS: http://localhost:5173
+      VITE_BACKEND_URL: http://localhost:3000
+      NODE_ENV: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start Docker Compose
+        run: docker compose -f docker-compose.yml up -d --build
+
+      - name: Wait for Postgres
+        run: |
+          max_attempts=20
+          attempt=1
+          until docker exec postgres pg_isready -U postgres -d blablabook || [ "$attempt" -ge "$max_attempts" ]; do
+            echo "Waiting for postgres..."
+            sleep 5
+            attempt=$((attempt + 1))
+          done
+
+          if [ "$attempt" -ge "$max_attempts" ]; then
+            docker compose logs postgres
+            exit 1
+          fi
+
+      - name: Wait for Backend
+        run: |
+          max_attempts=20
+          attempt=1
+          until curl -f http://localhost:3000/health || [ "$attempt" -ge "$max_attempts" ]; do
+            echo "Waiting for backend..."
+            sleep 5
+            attempt=$((attempt + 1))
+          done
+
+          if [ "$attempt" -ge "$max_attempts" ]; then
+            docker compose logs backend
+            exit 1
+          fi
+
+      - name: Wait for Frontend
+        run: |
+          max_attempts=20
+          attempt=1
+          until curl -f http://localhost:5173 || [ "$attempt" -ge "$max_attempts" ]; do
+            echo "Waiting for frontend..."
+            sleep 5
+            attempt=$((attempt + 1))
+          done
+
+          if [ "$attempt" -ge "$max_attempts" ]; then
+            docker compose logs frontend
+            exit 1
+          fi
+
+      - name: Docker status
+        run: docker compose ps
+
+      - name: Stop Docker Compose
+        if: always()
+        run: docker compose down --volumes
