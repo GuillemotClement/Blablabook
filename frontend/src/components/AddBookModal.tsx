@@ -97,6 +97,7 @@ export function AddBookModal({ isOpen, onClose, userId }: AddBookModalProps) {
         <div className="flex gap-2 mb-4 mt-2">
           <Input
             placeholder="Nom du livre, auteur..."
+            aria-label="Rechercher un livre ou un auteur"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
