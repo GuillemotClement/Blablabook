@@ -1,0 +1,215 @@
+name: Lighthouse
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+  pull_request:
+    branches:
+      - dev
+      - main
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  audit:
+    name: Lighthouse ${{ matrix.profile }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        profile:
+          - desktop
+          - mobile
+    env:
+      DB_NAME: blablabook
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/blablabook
+      JWT_SECRET: ci-secret
+      FRONTEND_URL_CORS: http://localhost:4173
+      NODE_ENV: dev
+      VITE_BACKEND_URL: http://localhost:3000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Start backend services
+        run: docker compose -f docker-compose.yml up -d --build postgres backend
+
+      - name: Wait for Backend
+        run: |
+          max_attempts=20
+          attempt=1
+          until curl -f http://localhost:3000/health || [ "$attempt" -ge "$max_attempts" ]; do
+            echo "Waiting for backend..."
+            sleep 5
+            attempt=$((attempt + 1))
+          done
+
+          if [ "$attempt" -ge "$max_attempts" ]; then
+            docker compose logs backend
+            exit 1
+          fi
+
+      - name: Start frontend preview
+        working-directory: frontend
+        run: |
+          npm run preview -- --host 0.0.0.0 --port 4173 > /tmp/blablabook-vite-preview.log 2>&1 &
+
+      - name: Wait for Frontend
+        run: |
+          max_attempts=20
+          attempt=1
+          until curl -f http://localhost:4173 || [ "$attempt" -ge "$max_attempts" ]; do
+            echo "Waiting for frontend preview..."
+            sleep 3
+            attempt=$((attempt + 1))
+          done
+
+          if [ "$attempt" -ge "$max_attempts" ]; then
+            cat /tmp/blablabook-vite-preview.log
+            exit 1
+          fi
+
+      - name: Run Lighthouse
+        id: lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            http://localhost:4173/
+            http://localhost:4173/login
+            http://localhost:4173/register
+            http://localhost:4173/see-all
+            http://localhost:4173/cgu
+            http://localhost:4173/library
+            http://localhost:4173/profile
+            http://localhost:4173/books/9782070612758
+          configPath: ./.github/lighthouse/${{ matrix.profile }}.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Comment Lighthouse report on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          LIGHTHOUSE_PROFILE: ${{ matrix.profile }}
+          LIGHTHOUSE_LINKS: ${{ steps.lighthouse.outputs.links }}
+          LIGHTHOUSE_MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
+          LIGHTHOUSE_ASSERTIONS: ${{ steps.lighthouse.outputs.assertionResults }}
+        with:
+          script: |
+            const profile = process.env.LIGHTHOUSE_PROFILE;
+            const marker = `<!-- blablabook-lighthouse-${profile} -->`;
+
+            const parseJson = (value, fallback) => {
+              try {
+                return value ? JSON.parse(value) : fallback;
+              } catch {
+                return fallback;
+              }
+            };
+
+            const links = parseJson(process.env.LIGHTHOUSE_LINKS, {});
+            const manifest = parseJson(process.env.LIGHTHOUSE_MANIFEST, []);
+            const assertions = parseJson(process.env.LIGHTHOUSE_ASSERTIONS, []);
+            const failedAssertions = assertions.filter((assertion) => !assertion.passed);
+            const formatScore = (score) => {
+              if (typeof score !== 'number') return 'n/a';
+              return `${Math.round(score * 100)}`;
+            };
+
+            const rows = manifest
+              .filter((entry) => entry.isRepresentativeRun !== false)
+              .map((entry) => {
+                const reportUrl = links[entry.url] || links[entry.finalUrl] || '';
+                const report = reportUrl ? `[rapport](${reportUrl})` : 'artifact';
+                return [
+                  entry.url.replace('http://localhost:4173', '') || '/',
+                  formatScore(entry.summary?.performance),
+                  formatScore(entry.summary?.accessibility),
+                  formatScore(entry.summary?.['best-practices']),
+                  formatScore(entry.summary?.seo),
+                  report,
+                ];
+              });
+
+            const table = rows.length
+              ? [
+                  '| Page | Performance | Accessibilité | Bonnes pratiques | SEO | Rapport |',
+                  '| --- | ---: | ---: | ---: | ---: | --- |',
+                  ...rows.map((row) => `| ${row.join(' | ')} |`),
+                ].join('\n')
+              : '_Aucun résultat Lighthouse disponible. Consulte les logs du workflow._';
+
+            const failures = failedAssertions.length
+              ? [
+                  '',
+                  '**Assertions en échec**',
+                  '',
+                  ...failedAssertions.map((assertion) => {
+                    const actual = typeof assertion.actual === 'number' ? Math.round(assertion.actual * 100) : assertion.actual;
+                    const expected = typeof assertion.expected === 'number' ? Math.round(assertion.expected * 100) : assertion.expected;
+                    return `- ${assertion.url.replace('http://localhost:4173', '') || '/'}: ${assertion.auditId} attendu ${expected}, obtenu ${actual}`;
+                  }),
+                ].join('\n')
+              : '';
+
+            const body = [
+              marker,
+              `## Lighthouse ${profile}`,
+              '',
+              'Seuil minimal par catégorie: **95**.',
+              '',
+              table,
+              failures,
+            ].filter(Boolean).join('\n');
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const previous = comments.data.find((comment) => comment.body?.includes(marker));
+
+            if (previous) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: previous.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }
+
+      - name: Stop services
+        if: always()
+        run: docker compose down --volumes
