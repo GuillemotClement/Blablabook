@@ -9,6 +9,8 @@ Ces workflows se lancent automatiquement sur :
 - les pushs sur `dev`
 - les pushs sur `main`
 
+Exception : le workflow Lighthouse est actuellement en declenchement manuel.
+
 Si un job echoue, GitHub affiche un check en erreur sur la PR. Selon les protections de branches configurees, cela peut bloquer le merge.
 
 ## Frontend CI
@@ -90,6 +92,8 @@ Si cette CI echoue, le probleme vient souvent de l'integration entre les service
 Fichier : `.github/workflows/lighthouse.yml`
 
 Cette CI mesure la qualite des pages frontend avec Lighthouse.
+
+Elle est actuellement en standby : elle ne se lance pas automatiquement sur les PR ou les pushs. Elle peut etre lancee manuellement depuis l'onglet Actions de GitHub.
 
 Elle lance les audits en deux versions :
 
