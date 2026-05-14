@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/authStore";
 import CguPage from "@/pages/Cgu/CguPage";
+import ConfidentialitePage from "@/pages/Confidentialite/ConfidentialitePage";
 
 // Lazy-loaded pages for code splitting - each route downloads only when visited
 const LoginPage = lazy(() => import("@/pages/Auth/LoginPage/LoginPage"));
@@ -42,6 +43,12 @@ const cguPage = createRoute({
   getParentRoute: () => rootRoute,
   path: "/cgu",
   component: () => <CguPage />,
+});
+
+const confidentialitePage = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/confidentialite",
+  component: () => <ConfidentialitePage />,
 });
 
 const homeRoute = createRoute({
@@ -96,6 +103,7 @@ const routeTree = rootRoute.addChildren([
   seeAllRoute,
   bookDetailsRoute,
   cguPage,
+  confidentialitePage,
   protectedRoute.addChildren([libraryRoute, profilePage]),
 ]);
 
