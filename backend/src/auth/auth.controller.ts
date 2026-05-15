@@ -28,6 +28,7 @@ import { plainToInstance } from 'class-transformer';
 import { AuthGuard } from './auth.guard';
 import { CookieService } from '../security/cookie/cookie.service';
 import { TokenService } from '../security/token/token.service';
+import { Public } from './public.decorator';
 
 @ApiTags('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -40,6 +41,7 @@ export class AuthController {
   ) {}
 
   @Post('/register')
+  @Public()
   @ApiCreatedResponse({
     description: 'User is created with password hashed.',
     type: RegisterResponseDto,
@@ -54,6 +56,7 @@ export class AuthController {
   }
 
   @Post('/login')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     description: 'User is logged.',

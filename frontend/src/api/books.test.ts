@@ -97,9 +97,9 @@ describe("books api", () => {
     const responseData = [{ id: 2, name: "B" }];
     mockApi.get.mockResolvedValueOnce({ data: responseData });
 
-    const result = await getUserBooks(7);
+    const result = await getUserBooks();
 
-    expect(mockApi.get).toHaveBeenCalledWith("/books/library/7");
+    expect(mockApi.get).toHaveBeenCalledWith("/books/library");
     expect(result).toEqual(responseData);
   });
 
@@ -117,9 +117,9 @@ describe("books api", () => {
     const created = createBookRow({ id: 3 });
     mockApi.post.mockResolvedValueOnce({ data: created });
 
-    const result = await addBookToUserList(4, dto);
+    const result = await addBookToUserList(dto);
 
-    expect(mockApi.post).toHaveBeenCalledWith("/books/library/4", dto);
+    expect(mockApi.post).toHaveBeenCalledWith("/books/library", dto);
     expect(result).toBe(created);
   });
 
@@ -127,9 +127,9 @@ describe("books api", () => {
     const deleted = [{ id: 8 }];
     mockApi.delete.mockResolvedValueOnce({ data: deleted });
 
-    const result = await removeBookFromUserList(5, 8);
+    const result = await removeBookFromUserList(8);
 
-    expect(mockApi.delete).toHaveBeenCalledWith("/books/library/5/book/8");
+    expect(mockApi.delete).toHaveBeenCalledWith("/books/library/book/8");
     expect(result).toBe(deleted);
   });
 
@@ -140,10 +140,10 @@ describe("books api", () => {
       readStart: new Date("2024-01-01"),
       readEnd: new Date("2024-02-01"),
     });
-    await updateBookStatus(2, 1, "À lire", book);
+    await updateBookStatus(1, "À lire", book);
 
     expect(mockApi.patch).toHaveBeenCalledWith(
-      "/books/library/2/book/1/status",
+      "/books/library/book/1/status",
       { readStart: null, readEnd: null },
     );
   });
@@ -156,10 +156,10 @@ describe("books api", () => {
       readStart: null,
       readEnd: null,
     });
-    await updateBookStatus(2, 1, "En cours", book);
+    await updateBookStatus(1, "En cours", book);
 
     expect(mockApi.patch).toHaveBeenCalledWith(
-      "/books/library/2/book/1/status",
+      "/books/library/book/1/status",
       { readStart: "2024-03-01T00:00:00.000Z", readEnd: null },
     );
   });
@@ -172,10 +172,10 @@ describe("books api", () => {
       readStart: new Date("2024-03-01T00:00:00.000Z"),
       readEnd: null,
     });
-    await updateBookStatus(2, 1, "Lu", book);
+    await updateBookStatus(1, "Lu", book);
 
     expect(mockApi.patch).toHaveBeenCalledWith(
-      "/books/library/2/book/1/status",
+      "/books/library/book/1/status",
       {
         readStart: "2024-03-01T00:00:00.000Z",
         readEnd: "2024-03-02T00:00:00.000Z",

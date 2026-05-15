@@ -13,6 +13,7 @@ import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookStatusDto } from './dto/update-book-status.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { CurrentUserId } from 'src/auth/current-user-id.decorator';
 
 /**
  * REST controller for book-related routes.
@@ -44,57 +45,56 @@ export class BooksController {
   }
 
   /**
-   * GET /books/library/:userId
-   * Returns all books linked to the user's list, with a computed `status`.
+   * GET /books/library
+   * Returns all books linked to the authenticated user's list.
    */
-  @Get('library/:userId')
+  @Get('library')
   @ApiOperation({ summary: 'Get all books for a user' })
   @ApiResponse({
     status: 200,
     description: 'User books retrieved successfully',
   })
-  async getUserBooks(@Param('userId', ParseIntPipe) userId: number) {
+  async getUserBooks(@CurrentUserId() userId: number) {
     return this.booksService.findUserBooks(userId);
   }
 
   /**
-   * POST /books/library/:userId
-   * Adds a book to the user's list, creating the book and/or list if needed.
+   * POST /books/library
+   * Adds a book to the authenticated user's list.
    */
-  @Post('library/:userId')
+  @Post('library')
   @ApiOperation({ summary: 'Add a book to a user library' })
   @ApiResponse({ status: 201, description: 'Book added to user library' })
   async addBookToUserList(
-    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUserId() userId: number,
     @Body() createBookDto: CreateBookDto,
   ) {
     return this.booksService.addToUserList(userId, createBookDto);
   }
 
   /**
-   * DELETE /books/library/:userId/book/:bookId
-   * Removes the link between a book and the user's list.
+   * DELETE /books/library/book/:bookId
+   * Removes the link between a book and the authenticated user's list.
    */
-  @Delete('library/:userId/book/:bookId')
+  @Delete('library/book/:bookId')
   @ApiOperation({ summary: 'Remove a book from a user library' })
   @ApiResponse({ status: 200, description: 'Book removed from user library' })
   async removeBookFromUserList(
-    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUserId() userId: number,
     @Param('bookId', ParseIntPipe) bookId: number,
   ) {
     return this.booksService.removeFromUserList(userId, bookId);
   }
 
   /**
-   * PATCH /books/library/:userId/book/:bookId/status
-   * Updates the reading dates (readStart, readEnd) for a book in the user's list.
-   * This allows changing the computed status based on dates.
+   * PATCH /books/library/book/:bookId/status
+   * Updates the reading dates for a book in the authenticated user's list.
    */
-  @Patch('library/:userId/book/:bookId/status')
+  @Patch('library/book/:bookId/status')
   @ApiOperation({ summary: 'Update reading status for a book in user library' })
   @ApiResponse({ status: 200, description: 'Book status updated successfully' })
   async updateBookStatusDates(
-    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUserId() userId: number,
     @Param('bookId', ParseIntPipe) bookId: number,
     @Body() updateDatesDto: UpdateBookStatusDto,
   ) {
