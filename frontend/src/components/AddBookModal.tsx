@@ -33,7 +33,7 @@ export function AddBookModal({ isOpen, onClose, userId }: AddBookModalProps) {
   // User's current library, used to mark items already added
   const { data: userBooks = [] } = useQuery({
     queryKey: ["userBooks", userId],
-    queryFn: () => getUserBooks(userId!),
+    queryFn: () => getUserBooks(),
     enabled: !!userId,
   });
 

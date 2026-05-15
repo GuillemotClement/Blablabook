@@ -1,5 +1,4 @@
 @baseUrl = http://localhost:3000
-@userId = 1
 @bookId = 1
 
 ############################################################
@@ -11,11 +10,11 @@ GET {{baseUrl}}/books
 
 ###
 ### Get user library
-GET {{baseUrl}}/books/library/{{userId}}
+GET {{baseUrl}}/books/library
 
 ###
 ### Add a book to user library
-POST {{baseUrl}}/books/library/{{userId}}
+POST {{baseUrl}}/books/library
 Content-Type: application/json
 
 {
@@ -30,7 +29,7 @@ Content-Type: application/json
 
 ###
 ### Update reading dates (drives computed status)
-PATCH {{baseUrl}}/books/library/{{userId}}/book/{{bookId}}/status
+PATCH {{baseUrl}}/books/library/book/{{bookId}}/status
 Content-Type: application/json
 
 {
@@ -40,4 +39,4 @@ Content-Type: application/json
 
 ###
 ### Remove a book from user library
-DELETE {{baseUrl}}/books/library/{{userId}}/book/{{bookId}}
+DELETE {{baseUrl}}/books/library/book/{{bookId}}

@@ -109,7 +109,7 @@ Attendu: `401 Unauthorized`.
 Exemple avec une route bibliotheque:
 
 ```bash
-curl -i http://localhost:3000/books/library/1
+curl -i http://localhost:3000/books/library
 ```
 
 Attendu: `401 Unauthorized`.

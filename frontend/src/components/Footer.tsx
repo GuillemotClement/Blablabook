@@ -1,4 +1,4 @@
-import { Mail, Lock, FileText } from "lucide-react";
+import {Lock, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -26,21 +26,6 @@ export default function Footer() {
           </div>
           {/* Navigation / Liens */}
           <nav className="flex flex-wrap items-center gap-3 justify-center">
-            {/* <Tooltip>
-              <TooltipTrigger asChild>
-                <a href="mailto:contact@blablabook.com">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex items-center gap-2 hover:bg-secondary/20 hover:text-secondary transition-colors"
-                  >
-                    <Mail className="h-4 w-4" />
-                    <span className="text-sm">Contact</span>
-                  </Button>
-                </a>
-              </TooltipTrigger>
-              <TooltipContent>Envoyer un mail</TooltipContent>
-            </Tooltip> */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <a href="/cgu">

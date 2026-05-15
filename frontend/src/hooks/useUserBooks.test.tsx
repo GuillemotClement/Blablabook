@@ -78,7 +78,7 @@ describe("useUserBooks", () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.books).toEqual(books);
-    expect(getUserBooks).toHaveBeenCalledWith(10);
+    expect(getUserBooks).toHaveBeenCalledWith();
   });
 
   it("does not fetch when userId is missing", () => {
@@ -100,7 +100,7 @@ describe("useUserBooks", () => {
     });
 
     await waitFor(() => {
-      expect(removeBookFromUserList).toHaveBeenCalledWith(3, 5);
+      expect(removeBookFromUserList).toHaveBeenCalledWith(5);
       expect(invalidateSpy).toHaveBeenCalledWith({
         queryKey: ["userBooks", 3],
       });
@@ -126,7 +126,7 @@ describe("useUserBooks", () => {
     });
 
     await waitFor(() => {
-      expect(updateBookStatus).toHaveBeenCalledWith(4, 2, "Lu", currentBook);
+      expect(updateBookStatus).toHaveBeenCalledWith(2, "Lu", currentBook);
       expect(invalidateSpy).toHaveBeenCalledWith({
         queryKey: ["userBooks", 4],
       });

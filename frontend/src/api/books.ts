@@ -28,8 +28,8 @@ export const getBooks = async (): Promise<BookRow[]> => {
 };
 
 /** Get all books from a specific user's library (with computed status). */
-export const getUserBooks = async (userId: number): Promise<BookRow[]> => {
-  const response = await api.get<BookRow[]>(`/books/library/${userId}`);
+export const getUserBooks = async (): Promise<BookRow[]> => {
+  const response = await api.get<BookRow[]>("/books/library");
   return response.data;
 };
 
@@ -48,23 +48,18 @@ export const getRandomBooks = async (limit: number): Promise<BookRow[]> => {
  * will create it first, then link it to the user's list.
  */
 export const addBookToUserList = async (
-  userId: number,
   bookData: CreateBookDto,
 ): Promise<BookRow> => {
-  const response = await api.post<BookRow>(
-    `/books/library/${userId}`,
-    bookData,
-  );
+  const response = await api.post<BookRow>("/books/library", bookData);
   return response.data;
 };
 
 /** Remove a book from a user's list by unlinking it on the backend. */
 export const removeBookFromUserList = async (
-  userId: number,
   bookId: number,
 ): Promise<{ id: number }[]> => {
   const response = await api.delete<{ id: number }[]>(
-    `/books/library/${userId}/book/${bookId}`,
+    `/books/library/book/${bookId}`,
   );
   return response.data;
 };
@@ -77,7 +72,6 @@ export const removeBookFromUserList = async (
  * - "Lu": readEnd is set
  */
 export const updateBookStatus = async (
-  userId: number,
   bookId: number,
   status: "Lu" | "En cours" | "À lire",
   currentBook: BookRow,
@@ -115,7 +109,7 @@ export const updateBookStatus = async (
   }
 
   const response = await api.patch<BookRow>(
-    `/books/library/${userId}/book/${bookId}/status`,
+    `/books/library/book/${bookId}/status`,
     { readStart, readEnd },
   );
   return response.data;
