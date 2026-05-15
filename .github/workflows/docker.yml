@@ -19,7 +19,7 @@ jobs:
       DB_USER: postgres
       DB_PASSWORD: postgres
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/blablabook
-      JWT_SECRET: ci-secret
+      JWT_SECRET: 3eeb7f868e5e4b716707b94e41d89148ce8f554ae2c06e5791f1106407305b8f
       FRONTEND_URL_CORS: http://localhost:5173
       VITE_BACKEND_URL: http://localhost:3000
       NODE_ENV: dev
