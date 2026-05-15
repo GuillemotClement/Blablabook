@@ -75,7 +75,7 @@ export const useAddBook = (userId?: number) => {
         categories: externalBook.categories || "Unknown category",
       };
 
-      return addBookToUserList(userId, createBookDto);
+      return addBookToUserList(createBookDto);
     },
     onSuccess: () => {
       // Invalidate and refetch the user's library so UI reflects the change

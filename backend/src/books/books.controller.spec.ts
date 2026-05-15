@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BooksController } from './books.controller';
 import { BooksService } from './books.service';
 import { book, category, listBook } from '../db/schema';
+import { PATH_METADATA } from '@nestjs/common/constants';
 
 type BookRow = typeof book.$inferSelect;
 type CategoryRow = typeof category.$inferSelect;
@@ -82,6 +83,28 @@ describe('BooksController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  it('should not expose userId in library route paths', () => {
+    const prototype = BooksController.prototype;
+    const routeNames = [
+      'getUserBooks',
+      'addBookToUserList',
+      'removeBookFromUserList',
+      'updateBookStatusDates',
+    ] as const;
+
+    const routePaths = routeNames.map((routeName) =>
+      Reflect.getMetadata(PATH_METADATA, prototype[routeName]),
+    );
+
+    expect(routePaths).toEqual([
+      'library',
+      'library',
+      'library/book/:bookId',
+      'library/book/:bookId/status',
+    ]);
+    expect(routePaths).not.toContain(expect.stringContaining(':userId'));
   });
 
   describe('getAllBooks', () => {

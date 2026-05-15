@@ -90,7 +90,7 @@ describe("useAddBook", () => {
 
     await result.current.mutateAsync(baseExternalBook);
 
-    expect(addBookToUserList).toHaveBeenCalledWith(7, {
+    expect(addBookToUserList).toHaveBeenCalledWith({
       name: "Test Book",
       author: "Jane Doe",
       isbn: "1234567890",
@@ -127,7 +127,6 @@ describe("useAddBook", () => {
     expect(getOpenLibIsbnData).toHaveBeenCalledWith("0987654321");
     expect(getOpenLibWorkData).toHaveBeenCalledWith("/works/OL123W");
     expect(addBookToUserList).toHaveBeenCalledWith(
-      5,
       expect.objectContaining({
         description: "Fetched description",
       }),

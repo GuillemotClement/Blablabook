@@ -61,7 +61,7 @@ const BookDetails = () => {
         publishedAt: formatDateForDB(bookData.publishedAt),
         categories: bookData.categories,
       };
-      return addBookToUserList(currentUser.id, payload);
+      return addBookToUserList(payload);
     },
     onSuccess: () => {
       refetch();

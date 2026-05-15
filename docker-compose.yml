@@ -44,7 +44,7 @@ services:
       - "3000:3000"
     healthcheck:
       # Check if backend API is responding
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 10s
       timeout: 10s
       retries: 5

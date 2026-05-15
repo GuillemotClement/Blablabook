@@ -18,7 +18,7 @@ export const useUserBooks = (userId?: number) => {
   // Fetch user's books
   const booksQuery = useQuery({
     queryKey: ["userBooks", userId],
-    queryFn: () => getUserBooks(userId!),
+    queryFn: () => getUserBooks(),
     enabled: !!userId,
   });
 
@@ -26,7 +26,7 @@ export const useUserBooks = (userId?: number) => {
   const removeMutation = useMutation({
     mutationFn: (bookId: number) => {
       if (!userId) throw new Error("UserId is required");
-      return removeBookFromUserList(userId, bookId);
+      return removeBookFromUserList(bookId);
     },
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["userBooks", userId] }),
@@ -44,7 +44,7 @@ export const useUserBooks = (userId?: number) => {
       currentBook: BookRow;
     }) => {
       if (!userId) throw new Error("UserId is required");
-      return updateBookStatus(userId, bookId, status, currentBook);
+      return updateBookStatus(bookId, status, currentBook);
     },
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["userBooks", userId] }),
