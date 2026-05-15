@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthGuard } from './auth.guard';
 import { JwtService } from '@nestjs/jwt'; // Importe bien la classe !
+import { Reflector } from '@nestjs/core';
 import { TokenService } from '../security/token/token.service';
 import { CookieService } from '../security/cookie/cookie.service';
 import { UnauthorizedException } from '@nestjs/common/exceptions/unauthorized.exception';
+import { ExecutionContext } from '@nestjs/common';
 
 describe('AuthGuard', () => {
   let authGuard: AuthGuard;
@@ -21,8 +23,13 @@ describe('AuthGuard', () => {
     generateCookiesConfig: jest.fn(),
   };
 
+  const reflectorMock = {
+    getAllAndOverride: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
+    reflectorMock.getAllAndOverride.mockReturnValue(false);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -30,6 +37,7 @@ describe('AuthGuard', () => {
         { provide: JwtService, useValue: jwtServiceMock },
         { provide: TokenService, useValue: tokenServiceMock },
         { provide: CookieService, useValue: cookieServiceMock },
+        { provide: Reflector, useValue: reflectorMock },
       ],
     }).compile();
 
@@ -38,6 +46,21 @@ describe('AuthGuard', () => {
 
   it('should be defined', () => {
     expect(authGuard).toBeDefined();
+  });
+
+  describe('authGuard.canActivate', () => {
+    it('should allow public routes without requiring cookies', async () => {
+      reflectorMock.getAllAndOverride.mockReturnValue(true);
+
+      const context = {
+        getHandler: jest.fn(),
+        getClass: jest.fn(),
+      } as unknown as ExecutionContext;
+
+      await expect(authGuard.canActivate(context)).resolves.toBe(true);
+      expect(jwtServiceMock.verifyAsync).not.toHaveBeenCalled();
+      expect(tokenServiceMock.rotateTokens).not.toHaveBeenCalled();
+    });
   });
 
   describe('authGuard.extractTokenFromCookie', () => {
