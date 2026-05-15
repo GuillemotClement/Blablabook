@@ -92,7 +92,8 @@ This populates the `book` table and links them to the test user's list.
 
 ```bash
 cd backend
-npx ts-node src/seed.ts
+npm run build
+npm run seed
 ```
 
 ### 5️⃣ Access the services
