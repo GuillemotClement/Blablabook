@@ -1,11 +1,21 @@
+import { inArray } from 'drizzle-orm';
 import { db } from './db';
 import { book, bookCategory, category } from './db/schema';
+
+type SeedCategoryName = 'random' | 'bestsellers' | 'horror';
+
+function getSeedCategoryName(index: number): SeedCategoryName {
+  if (index >= 35 && index < 70) return 'bestsellers';
+  if (index >= 70) return 'horror';
+  return 'random';
+}
 
 async function seed() {
   console.log('Seeding : 105 livres français avec couvertures et maisons d\'édition...');
 
   const categoriesToInsert = [
     { name: 'random' },
+    { name: 'bestsellers' },
     { name: 'horror' },
     { name: 'love' },
   ];
@@ -148,24 +158,44 @@ async function seed() {
     .onConflictDoNothing({ target: category.name });
 
   const allCategories = await db.select().from(category);
+  const categoryIdsByName = new Map(allCategories.map((c) => [c.name, c.id]));
+  const missingCategories = categoriesToInsert
+    .map((c) => c.name)
+    .filter((name) => !categoryIdsByName.has(name));
 
-  // Liaisons
-  if (insertedBooks.length > 0) {
-    const links = insertedBooks.map((b, i) => {
-      let catName = 'random';
-      if (i >= 35 && i < 70) catName = 'bestsellers';
-      if (i >= 70) catName = 'horror';
-
-      return {
-        bookId: b.id,
-        categoryId: allCategories.find(c => c.name === catName)!.id
-      };
-    });
-
-    await db.insert(bookCategory).values(links).onConflictDoNothing();
-    console.log(`${links.length} liaisons créées avec succès ! 🔗`);
+  if (missingCategories.length > 0) {
+    throw new Error(`Catégories introuvables après insertion : ${missingCategories.join(', ')}`);
   }
 
+  const seedIsbns = booksData.map((b) => b.isbn);
+  const seededBooks = await db
+    .select({ id: book.id, isbn: book.isbn })
+    .from(book)
+    .where(inArray(book.isbn, seedIsbns));
+  const bookIdsByIsbn = new Map(seededBooks.map((b) => [b.isbn, b.id]));
+
+  const links = booksData.map((b, i) => {
+    const bookId = bookIdsByIsbn.get(b.isbn);
+    const categoryName = getSeedCategoryName(i);
+    const categoryId = categoryIdsByName.get(categoryName);
+
+    if (!bookId) {
+      throw new Error(`Livre introuvable après insertion : ${b.name} (${b.isbn})`);
+    }
+
+    if (!categoryId) {
+      throw new Error(`Catégorie introuvable : ${categoryName}`);
+    }
+
+    return { bookId, categoryId };
+  });
+
+  if (links.length > 0) {
+    await db.insert(bookCategory).values(links).onConflictDoNothing();
+    console.log(`${links.length} liaisons vérifiées avec succès ! 🔗`);
+  }
+
+  console.log(`${insertedBooks.length} nouveaux livres insérés.`);
   console.log('Seeding terminé ! 🚀');
 }
 
