@@ -9,6 +9,7 @@ import { CookieService } from 'src/security/cookie/cookie.service';
 import { TokenService } from 'src/security/token/token.service';
 import { TokenRepository } from 'src/security/token/token.respository';
 import { AuthGuard } from './auth.guard';
+import { getJwtSecret } from './jwt.config';
 
 @Module({
   controllers: [AuthController],
@@ -16,7 +17,7 @@ import { AuthGuard } from './auth.guard';
     UserModule,
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET || 'mimixlatrix',
+      secret: getJwtSecret(),
       signOptions: { expiresIn: '15m' },
     }),
   ],

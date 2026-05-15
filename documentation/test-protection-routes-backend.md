@@ -12,6 +12,20 @@ Toutes les autres routes doivent refuser une requete sans cookies d'authentifica
 
 ## Prerequis
 
+Verifier que `JWT_SECRET` est configure avec une valeur forte dans `.env`.
+
+Exemple de generation locale:
+
+```bash
+openssl rand -hex 32
+```
+
+La valeur obtenue doit etre placee dans `.env`:
+
+```env
+JWT_SECRET=<valeur-generee>
+```
+
 Demarrer l'application:
 
 ```bash
