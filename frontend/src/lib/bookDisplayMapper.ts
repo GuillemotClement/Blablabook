@@ -2,13 +2,19 @@ import type { BookRow } from "@/@types/books";
 import type { ExternalBook } from "@/@types/externalBooks";
 import type { BookDisplay } from "@/@types/books";
 
+function mapCover(coverId: string) {
+  if (!coverId) return "";
+  if (coverId.startsWith("http") || coverId.startsWith("/")) return coverId;
+  return `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`;
+}
+
 // Maps a BookRow (internal) to a BookDisplay
 export function mapBookRowToDisplay(book: BookRow): BookDisplay {
   return {
     key: book.id.toString(),
     title: book.name,
     author: book.author,
-    cover: book.coverId ?? "",
+    cover: mapCover(book.coverId),
     isbn: book.isbn,
     categories: book.categories ?? [],
   };

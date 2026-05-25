@@ -14,6 +14,7 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookStatusDto } from './dto/update-book-status.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CurrentUserId } from 'src/auth/current-user-id.decorator';
+import { Public } from 'src/auth/public.decorator';
 
 /**
  * REST controller for book-related routes.
@@ -29,6 +30,7 @@ export class BooksController {
    * Returns all books persisted in the `book` table (not user-specific).
    */
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get all books' })
   @ApiResponse({ status: 200, description: 'Books retrieved successfully' })
   async getAllBooks() {
@@ -40,6 +42,7 @@ export class BooksController {
    * Returns randoms books persisted in the `book` table (not user-specific).
    */
   @Get('random')
+  @Public()
   async getRandomBooks(@Query('limit') limit: string = '10') {
     return this.booksService.getRandomBooks(parseInt(limit));
   }
