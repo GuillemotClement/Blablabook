@@ -48,6 +48,7 @@ afterEach(() => {
  */
 const createBookRow = (overrides?: Partial<BookRow>): BookRow => ({
   id: 1,
+  key: "book-a",
   name: "Book A",
   author: "Author A",
   isbn: "111",
