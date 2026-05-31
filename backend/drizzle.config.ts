@@ -1,8 +1,13 @@
 import { defineConfig } from 'drizzle-kit';
 
+const pathToSchema =
+  process.env.NODE_ENV === 'prod'
+    ? './dist/db/schema.ts'
+    : "'./src/db/schema.ts'";
+
 export default defineConfig({
   out: './drizzle',
-  schema: './src/db/schema.ts',
+  schema: pathToSchema,
   dialect: 'postgresql',
   dbCredentials: {
     url: process.env.DATABASE_URL!,
