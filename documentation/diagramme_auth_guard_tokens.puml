@@ -1,0 +1,58 @@
+@startuml
+title Diagramme de sequence - Login et creation des tokens
+
+actor "Utilisateur" as User
+participant "Frontend React" as Front
+participant "Axios\nwithCredentials=true" as Axios
+participant "AuthGuard global\nAPP_GUARD" as Guard
+participant "AuthController" as AuthController
+participant "AuthService" as AuthService
+participant "UserService" as UserService
+participant "PasswordService" as PasswordService
+participant "TokenService" as TokenService
+participant "CookieService" as CookieService
+participant "Store Zustand" as Store
+database "PostgreSQL\nuser / refresh_token" as DB
+
+User -> Front : Saisit username et mot de passe
+Front -> Axios : POST /auth/login\n{ username, password }
+Axios -> Guard : Route @Public()
+Guard --> AuthController : Laisse passer sans verifier les cookies
+
+AuthController -> AuthService : login(payload)
+AuthService -> UserService : getUserByUsername(username)
+UserService -> DB : Recherche utilisateur par username
+DB --> UserService : Utilisateur + mot de passe hashe
+UserService --> AuthService : user | null
+
+alt Identifiants invalides
+  AuthService --> AuthController : UnauthorizedException
+  AuthController --> Axios : 401 Unauthorized
+  Axios --> Front : Erreur de connexion
+  Front --> User : Affiche le message d'erreur
+else Utilisateur trouve
+  AuthService -> PasswordService : checkPassword(hash, password)
+  PasswordService --> AuthService : true
+  AuthService --> AuthController : user
+
+  AuthController -> TokenService : generateJWTToken(user.id, user.role)
+  TokenService -> TokenService : Signe un JWT\npayload { sub, userRole }\nexpiration 15 min
+  TokenService --> AuthController : jwtToken
+
+  AuthController -> TokenService : generateRefreshToken(user.id)
+  TokenService -> TokenService : Genere un token aleatoire
+  TokenService -> TokenService : Hash SHA-256 du refresh token
+  TokenService -> DB : INSERT refresh_token(hashedToken, userId)
+  DB --> TokenService : Token enregistre
+  TokenService --> AuthController : refreshToken brut
+
+  AuthController -> CookieService : generateCookiesConfig()
+  CookieService --> AuthController : Config jwt_cookie et refresh_cookie\nHttpOnly, sameSite=strict
+
+  AuthController --> Axios : 200 OK\nSet-Cookie jwt_cookie\nSet-Cookie refresh_cookie\nbody = donnees utilisateur
+  Axios --> Front : Donnees utilisateur
+  Front -> Store : login(user)\nisAuthenticated=true
+  Front --> User : Redirection vers l'application
+end
+
+@enduml
