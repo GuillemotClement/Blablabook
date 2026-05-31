@@ -1,9 +1,9 @@
 import { defineConfig } from 'drizzle-kit';
 
 const pathToSchema =
-  process.env.NODE_ENV === 'prod'
+  process.env.NODE_ENV === 'production'
     ? './dist/db/schema.ts'
-    : "'./src/db/schema.ts'";
+    : './src/db/schema.ts';
 
 export default defineConfig({
   out: './drizzle',
