@@ -9,7 +9,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       # Persist database data
-      - pgdata:/var/lib/postgresql/data
+      - pgdata_v2:/var/lib/postgresql/data
       # Initialize database with SQL script
       # - ../init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     # ports:
@@ -74,7 +74,7 @@ services:
     # ports:
     #   # Publish frontend port to host for direct browser access
     #   - "5173:80"
- 
+
   # Redis service
   # redis:
   #   image: redis:7-alpine
@@ -99,6 +99,6 @@ services:
 
 volumes:
   # Persistent volume for PostgreSQL data
-  pgdata:
+  pgdata_v2: null
   # Persistent volume for Redis data
   # redisdata:
