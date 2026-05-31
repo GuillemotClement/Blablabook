@@ -37,6 +37,7 @@ export const list = pgTable('list', {
 
 export const book = pgTable('book', {
   id: serial().primaryKey(),
+  key: text().notNull().unique(),
   name: varchar({ length: 255 }).notNull(),
   coverId: varchar('cover_id', { length: 255 }).notNull(),
   author: varchar({ length: 255 }).notNull(),

@@ -15,6 +15,7 @@ vi.mock("@tanstack/react-router", () => ({
  */
 const createBookRow = (overrides?: Partial<BookRow>): BookRow => ({
   id: 1,
+  key: "test-book",
   name: "Test Book",
   coverId: "cover.jpg",
   author: "Author",

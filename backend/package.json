@@ -11,6 +11,7 @@
     "start": "nest start",
     "seed": "node dist/seed.js",
     "seed:dev": "ts-node src/seed.ts",
+    "ol:fetch": "ts-node src/fetch-book.ts",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -22,7 +23,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migrate": "npx drizzle-kit push",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx src/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -35,12 +38,13 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
     "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.0",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "swagger-ui-express": "^5.0.1",
-    "drizzle-kit": "^0.31.10"
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

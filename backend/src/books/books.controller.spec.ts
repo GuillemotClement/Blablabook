@@ -27,6 +27,7 @@ interface BooksServiceMock {
 
 const makeBook = (overrides: Partial<BookRow> = {}): BookRow => ({
   id: 1,
+  key: '/works/OL1W',
   name: 'Book',
   coverId: 'cover-id',
   author: 'Author',

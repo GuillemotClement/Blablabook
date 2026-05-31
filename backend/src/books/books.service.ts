@@ -76,6 +76,7 @@ export class BooksService {
     const rows = await this.db
       .select({
         id: book.id,
+        key: book.key,
         name: book.name,
         coverId: book.coverId,
         author: book.author,
@@ -139,6 +140,7 @@ export class BooksService {
         const inserted = await this.db
           .insert(book)
           .values({
+            key: createBookDto.key ?? `isbn:${createBookDto.isbn}`,
             name: createBookDto.name,
             coverId: createBookDto.coverId,
             author: createBookDto.author,

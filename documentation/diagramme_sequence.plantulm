@@ -1,0 +1,95 @@
+@startuml
+title Diagramme de séquence - Authentification et renouvellement des tokens
+
+actor "Utilisateur" as User
+participant "Frontend React" as Front
+participant "Store Zustand" as Store
+participant "Axios" as Axios
+participant "AuthController" as AuthController
+participant "AuthService" as AuthService
+participant "TokenService" as TokenService
+participant "CookieService" as CookieService
+participant "JWT Guard" as Guard
+participant "Controller sécurisé" as SecuredController
+database "PostgreSQL" as DB
+
+== Connexion utilisateur ==
+
+User -> Front : Saisit username et mot de passe
+Front -> AuthController : POST /auth/login\n{ username, password }
+
+AuthController -> AuthService : login(payload)
+AuthService -> DB : Recherche utilisateur par username
+DB --> AuthService : Utilisateur + mot de passe hashé
+
+AuthService -> AuthService : Vérification du mot de passe
+
+alt Identifiants valides
+    AuthService --> AuthController : Données utilisateur
+
+    AuthController -> TokenService : generateJWTToken(user.id, user.role)
+    TokenService --> AuthController : JWT
+
+    AuthController -> TokenService : generateRefreshToken(user.id)
+    TokenService -> TokenService : Génération token aléatoire
+    TokenService -> TokenService : Hash SHA-256 du refresh token
+    TokenService -> DB : Stockage du refresh token hashé
+    DB --> TokenService : Token enregistré
+    TokenService --> AuthController : Refresh token brut
+
+    AuthController -> CookieService : generateCookiesConfig()
+    CookieService --> AuthController : Configuration cookies
+
+    AuthController --> Front : 200 OK\njwt_cookie HTTPOnly\nrefresh_cookie HTTPOnly\nDonnées utilisateur
+
+    Front -> Store : Stockage des données utilisateur
+    Front --> User : Redirection vers l'application
+
+else Identifiants invalides
+    AuthService --> AuthController : UnauthorizedException
+    AuthController --> Front : 401 Unauthorized
+    Front --> User : Message d'erreur
+end
+
+== Accès à une route protégée ==
+
+User -> Front : Accède à une fonctionnalité protégée
+Front -> Axios : Requête API
+Axios -> Guard : Requête avec jwt_cookie
+
+Guard -> Guard : Vérifie la présence du JWT
+Guard -> Guard : Vérifie la validité du JWT
+
+alt JWT valide
+    Guard -> Guard : Extraction du userId depuis le token
+    Guard -> SecuredController : Ajoute userId dans la request
+    SecuredController -> SecuredController : Traitement de la requête
+    SecuredController --> Axios : 200 OK
+    Axios --> Front : Données protégées
+
+else JWT expiré
+    Guard -> TokenService : rotateTokens(refresh_cookie)
+    TokenService -> TokenService : Hash SHA-256 du refresh token
+    TokenService -> DB : Recherche du refresh token hashé
+    DB --> TokenService : Utilisateur associé au token
+
+    alt Refresh token valide
+        TokenService -> TokenService : Génération nouveau JWT
+        TokenService -> TokenService : Génération nouveau refresh token
+        TokenService -> DB : Stockage du nouveau refresh token hashé
+        TokenService -> DB : Suppression de l'ancien refresh token
+        TokenService --> Guard : Nouveaux tokens + user
+
+        Guard -> SecuredController : Ajoute userId dans la request
+        SecuredController -> SecuredController : Traitement de la requête
+        SecuredController --> Axios : 200 OK\nNouveaux cookies HTTPOnly
+        Axios --> Front : Données protégées
+
+    else Refresh token absent ou invalide
+        TokenService --> Guard : UnauthorizedException
+        Guard --> Axios : 401 Unauthorized
+        Axios --> Front : Erreur non autorisée
+        Front --> User : Redirection vers la connexion
+    end
+end
+@enduml

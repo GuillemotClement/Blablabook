@@ -1,6 +1,11 @@
-import { IsNotEmpty, IsString, IsArray } from 'class-validator';
+import { IsNotEmpty, IsString, IsArray, IsOptional } from 'class-validator';
 
 export class CreateBookDto {
+  // Open Library work or edition key
+  @IsString()
+  @IsOptional()
+  key?: string;
+
   // Book title
   @IsString()
   @IsNotEmpty()

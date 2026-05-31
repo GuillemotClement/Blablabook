@@ -35,6 +35,7 @@ vi.mock("./axios", () => ({
  */
 const createBookRow = (overrides?: Partial<BookRow>): BookRow => ({
   id: 1,
+  key: "test-book",
   name: "Test Book",
   author: "Author",
   isbn: "123",

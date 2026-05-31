@@ -53,7 +53,6 @@ export default function RegisterPage() {
       return api.post("/auth/register", data);
     },
     onSuccess: () => {
-      // TODO: envoi un message pour indiquer que l'inscription à fonctionner
       navigate({ to: "/login" });
     },
     onError: (error) => {

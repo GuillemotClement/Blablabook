@@ -1,0 +1,16 @@
+flowchart TD
+    U[Utilisateur] --> N[Navigateur web]
+
+    N --> F[Front-end React / Vite]
+    F -->|Appels HTTPS / JSON| B[API REST NestJS]
+
+    B -->|Drizzle ORM| DB[(Base PostgreSQL)]
+
+    F -->|Recherche de livres| O[API externe OpenLibrary]
+
+    GH[GitHub] -->|Push / Merge main| C[Coolify]
+    C -->|Build & déploiement Docker| P[Serveur VPS / Production]
+
+    P --> F
+    P --> B
+    P --> DB

@@ -1,6 +1,7 @@
 export type BookStatus = "Lu" | "En cours" | "À lire";
 
 export interface CreateBookDto {
+  key?: string;
   name: string;
   coverId: string;
   author: string;
@@ -17,6 +18,7 @@ export interface CreateBookDto {
  */
 export interface BookRow {
   id: number;
+  key: string;
   name: string;
   coverId: string;
   author: string;

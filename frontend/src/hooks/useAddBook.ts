@@ -65,6 +65,7 @@ export const useAddBook = (userId?: number) => {
 
       const createBookDto: CreateBookDto = {
         // Fallbacks ensure minimal valid payloads if external fields are missing
+        key: externalBook.key,
         name: externalBook.title || "Unknown Title",
         author: externalBook.author || "Unknown Author",
         isbn: externalBook.isbn || "N/A",
@@ -72,7 +73,7 @@ export const useAddBook = (userId?: number) => {
         description: description || "Pas de description pour ce livre",
         publishingHouse: externalBook.publisher || "Unknown publisher",
         publishedAt: toIsoDate(externalBook.publishDate),
-        categories: externalBook.categories || "Unknown category",
+        categories: externalBook.categories || [],
       };
 
       return addBookToUserList(createBookDto);

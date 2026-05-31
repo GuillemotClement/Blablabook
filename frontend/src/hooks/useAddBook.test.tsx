@@ -53,6 +53,7 @@ const baseExternalBook: ExternalBook = {
  */
 const createMockBookRow = (overrides?: Partial<BookRow>): BookRow => ({
   id: 1,
+  key: "work-1",
   name: "Test Book",
   author: "Jane Doe",
   isbn: "1234567890",
@@ -91,6 +92,7 @@ describe("useAddBook", () => {
     await result.current.mutateAsync(baseExternalBook);
 
     expect(addBookToUserList).toHaveBeenCalledWith({
+      key: "work-1",
       name: "Test Book",
       author: "Jane Doe",
       isbn: "1234567890",

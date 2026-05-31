@@ -49,7 +49,7 @@ export default function HomePage() {
     useExternalBooks({
       mode: "search",
       param: search,
-    });
+  });
 
   let content;
   if (search) {
