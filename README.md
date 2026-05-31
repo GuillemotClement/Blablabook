@@ -53,12 +53,11 @@ The goal of **BlablaBook** is to provide a simple and intuitive personal library
 | **PostgreSQL**              | Relational database                    |
 | **Drizzle ORM**             | Modern, typed ORM                      |
 | **Swagger**                 | Automatic API documentation            |
-| **Adminer**                 | SQL administration interface           |
+| **Adminer**                 | SQL administration interface for dev         |
 | **OpenLibrary API**         | Book data source                       |
 | **Vitest**                  | Frontend testing                       |
 | **Jest**                    | Backend testing                        |
 | **Lighthouse**              | Performance and accessibility auditing |
-| **Artillery**               | Load testing                           |
 | **GitHub Actions**          | CI/CD                                  |
 
 ---
@@ -94,9 +93,9 @@ openssl rand -hex 32
 docker-compose up
 ```
 
-### 🌱 Seed the database (books)
+### 🌱 Seed the database for the dev (books)
 
-This populates the `book` table and links them to the test user's list.
+The script `seed.ts` populates the `category` and `book` table with OpenApi data.
 
 ```bash
 # in backend container
