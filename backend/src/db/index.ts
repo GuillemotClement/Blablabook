@@ -4,10 +4,7 @@ import * as schema from './schema';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: false, // connexion interne via le docker => pas besoin de SSL
-  // process.env.NODE_ENV === 'production'
-  //   ? { rejectUnauthorized: false } // Required for Supabase
-  //   : false, // Disabled for local Docker
+  ssl: false,
 });
 
 export const db: NodePgDatabase<typeof schema> = drizzle(pool, { schema });
